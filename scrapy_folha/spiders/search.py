@@ -6,24 +6,36 @@ class SearchSpider(scrapy.Spider):
     name = 'search'
     allowed_domains = ['search.folha.uol.com.br', 
                         'www1.folha.uol.com.br']
+    page_counter = 0
+    max_pages = 8
 
-    start_urls = ['http://search.folha.uol.com.br/?q=*']
+    start_urls = [f'http://search.folha.uol.com.br/?q=esportes'] 
+    # TODO: colocar kwarg no q para buscar por tema
+    # TODO: tratar data
+    # TODO: 
 
     def parse(self, response):
-      for li in response.css("ol.search-results-list li"):
-        link = li.css("a ::attr(href)").extract_first()  
+      
+      self.page_counter += 1
 
-        yield response.follow(link, self.parse_article)
+      link = response.css(".c-headline__content")
+      for item in link:
+        yield from self.parse_article(item, response)
 
-      next_page = response.css("div.pagination a::attr(href)").extract()[-2]
-      if next_page is not None:
+      next_page = response.css(".c-pagination__item+ .c-pagination__arrow a::attr(href)").get() #all()[:-2]
+      if next_page is not None and self.page_counter < self.max_pages:
           yield response.follow(next_page, self.parse)
+   
 
-    def parse_article(self, response):
-      link       = response.url
-      title      = response.css("article h1 ::text").extract_first()
-      text       = "".join(response.css("article div.content p ::text").extract())
-      created_at = "".join(response.css("article time ::text").extract())
+    def parse_article(self, content, response):
 
-      article = ScrapyFolhaItem(title=title, created_at=created_at, text=text, link=link)
-      yield article      
+      title = content.css(".c-headline__title::text").get()
+      text = content.css('.c-headline__standfirst::text').get()
+      image = response.css(".c-headline__image::attr(src)").get()
+      # category = content.css('.c-search__result_h3::text').get()
+      created_at = content.css('.c-headline__dateline::text').get()
+      link = content.css('.c-headline__content a::attr(href)').get()
+      
+      article = ScrapyFolhaItem(title=title, created_at=created_at, 
+                                text=text, link=link, image=image)#, category=category)
+      yield article

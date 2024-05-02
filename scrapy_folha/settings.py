@@ -65,9 +65,10 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   # 'scrapy_folha.pipelines.SaveItem': 400,
    'scrapy_folha.pipelines.CleanData': 300,
    'scrapy_folha.pipelines.ParseCategory': 200,
-}
+} # Os itens são executados na ordem do menor número pro maior. Convenção colocar números de 0 a 1000
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -89,3 +90,18 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# No settings.py do seu projeto Scrapy
+FEEDS = {
+    'noticias_folha.csv': {
+        'format': 'csv',
+        'encoding': 'utf8',
+        'store_empty': False,
+        'fields': None,  # Pode especificar uma lista de campos para incluir
+        'indent': None,
+        'item_export_kwargs': {
+            'include_headers_line': True,  # Inclui linha de cabeçalho no CSV
+            'join_multivalued': ', ',  # Define separador para listas
+        },
+    },
+}

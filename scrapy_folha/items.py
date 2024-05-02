@@ -13,6 +13,6 @@ class ScrapyFolhaItem(scrapy.Item):
     title      = scrapy.Field()
     text       = scrapy.Field()
     created_at = scrapy.Field()
+    image     = scrapy.Field()
     link       = scrapy.Field()
     category   = scrapy.Field()
-    subcategory = scrapy.Field()
